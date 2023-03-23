@@ -8,22 +8,30 @@ from rest_framework.exceptions import NotFound, NotAuthenticated
 """ 엘라스틱 서치 테스트 """
 from elasticsearch_dsl import Search
 from elasticsearch.exceptions import NotFoundError
-from elasticsearch import Elasticsearch
+#from elasticsearch import Elasticsearch
 from .serializers import PharmacyElasticSearchSerializer
 from elasticsearch.helpers import bulk
+from elasticsearch_dsl.query import Q
+
+
+
+
+
 class ElasticSearch(APIView):
     # 엘라스틱 서치에 저장된 데이터 출력
     def get(self, request):
         # 검색어
-        query = request.GET.get('elasticsearch-search','')
-        s = Search(index='pharmacy').query('multi_match', query=query, fields=['title','callNumber', 'address', 'coordinate_X', 'coordinate_Y'])
+        #client = ElasticSearch()using=client,
+        query = request.GET.get('search','')
+        s = Search().using('default').index('my_index')
+        q = Q('multi_match', query=query, fields=['title^3','callNumber', 'address', 'coordinate_X', 'coordinate_Y'])
         # elasticsearch-dsl 패키지의 search 클래스를 사용하여
         # Elasticsearch에서 데이터를 검색하는 예시,
         # request에서 search 파라미터를 받아와서 Search 클래스로 엘라스틱서치 쿼리를 작성.
         try:
-            response = s.excute()
+            response = s.query(q).execute()
             # excute() : 작성된 엘라스틱 서치 쿼리로 엘라스틱서치에 요청하여 결과를 받아옴.
-            hits = response.hits
+            hits = response.hits.hits
             results = [hit.to_dict() for hit in hits]
             serialized_results = PharmacyElasticSearchSerializer(results, many=True).data
         except NotFoundError:

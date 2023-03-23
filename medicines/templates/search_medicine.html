@@ -1,28 +1,10 @@
-<form method="GET" action="{% url 'searchmedicine' %}">
-  {% for board in boards %}
-    <ul>
-      <li>{{board.name}}</li>
-      <li>{{board.effect}}</li>
-    </ul>
-    {% endfor %}
-    <!--pagenation-->
-    <div class="pagination">
-      {% if posts.has_previous %}
-        <a href="?page=1&search={{search}}">First</a>
-        <a href="?page={{posts.previous_page_number}}&search={{search}}">Previous</a>
-      {% endif %}
-  
-      <span>{{posts.number}} / {{posts.paginator.num_pages}}</span>
-  
-      {% if posts.has_next %}
-        <a href="?page={{posts.next_page_number}}&search={{search}}">Next</a>
-        <a href="?page={{posts.paginator.num_pages}}&search={{search}}">Last</a>
-      {% endif %}
-    </div>
-  
-    <!--검색-->
-    <div id="search">
-      <input name="search" type="text">
-      <button class="btn btn-primary" type="submit">검색</button>
-    </div>
-    </form>
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+  </head>
+  <body>
+    {{serializer.data}}
+  </body>
+</html>

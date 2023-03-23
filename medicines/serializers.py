@@ -64,7 +64,11 @@ class MedicineSerializer(ModelSerializer):
             "etcChoices",
             "rating",
         )
-
+# SerializerMethodField를 사용하면 DB에 없는 내용이라도 출력할 수 있다.
+# ex) ratingTest = serializers.SerializerMethodField()
+# def get_ratingTest(self, medicine):
+#     return meditine.updated_at
+# 형식으로 호출하여 함수 이름으로 fields에 넣어줄 수 있다.
 
 class MedicineDetailSerializer(ModelSerializer):
     #comment = CommentSerializer(read_only=True, many=True)
@@ -82,7 +86,13 @@ class MedicineDetailSerializer(ModelSerializer):
             "rating",
             "reviews_count",
             "reviews",
+            #"is_admin",
         )
+    #is_admin = serializers.SerializerMethodField()
+    #def get_is_admin(self, medicine):
+    #    request = self.context['request']
+    #    return medicine.permission_writer == request.user
+
 
 
 class TinyMedicineSerializer(ModelSerializer):

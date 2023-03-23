@@ -35,6 +35,7 @@ class Medicine(models.Model):
 
     caution = models.TextField(
         verbose_name = "주의사항",
+        null=True,
     )
     # 주의사항
 

@@ -19,9 +19,9 @@ opencv-python = "^4.7.0.72"
 matplotlib = "^3.7.1"
 google-cloud-vision = "^3.4.0"
 elasticsearch = "7"
-elasticsearch-dsl = "^7.4.1"
 mysql = "^0.0.3"
 mysql-connector-python = "^8.0.32"
+elasticsearch-dsl = "7.0"
 
 
 [build-system]

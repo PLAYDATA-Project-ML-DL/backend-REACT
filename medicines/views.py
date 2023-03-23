@@ -20,7 +20,7 @@ import io
 import os
 import re
 import time
-
+from rest_framework.renderers import JSONRenderer
 
 
 
@@ -50,35 +50,26 @@ class ElasticSearch(APIView):
             serialized_results = []
         return Response({'results': serialized_results})
 
-
-
-
-""" 의약품 직접검색 """
+""" 의약품 직접검색 폐기 """
 def searchMedicine(request):
     start = time.time()
     content_list = Medicine.objects.all()
     search = request.GET.get('searchmedicine','')
     print(search)
-    searchMedicine_result=[]
+    #searchMedicine_result=[]
     if search:
         searchMedicine_result = content_list.filter(
-        Q(name__icontains = search),# | #제목
-        #Q(body__icontains = search) | #내용
-        #Q(writer__username__icontains = search) #글쓴이
-        
+        Q(name__icontains = search),
         )
     print(searchMedicine_result)  # 검색 결과를 콘솔에 출력합니다.
     end = time.time()
     print(f"{end - start:.5f} sec")
-    paginator = Paginator(searchMedicine_result,5)
-    page = request.GET.get('page','')
-    posts = paginator.get_page(page)
-    boards = Medicine.objects.all()
     serializer = MedicineDetailSerializer(searchMedicine_result, many=True)
-    return render(request, 'search_medicine.html',{'posts':posts, 'Boards':boards, 'search':search})
+    json_data = serializer.data
+    return Response(serializer.data)
+    #return render(request, 'search_medicine.html', json_data)
 
-""" 의약품 직접검색 결과 테스트 """
-
+""" 의약품 직접검색 """
 class searchMedicineResult(APIView):
     def get(self, request):
         try:
@@ -90,7 +81,7 @@ class searchMedicineResult(APIView):
         start = (page-1) * page_size
         end = start + page_size
         content_list = Medicine.objects.all()
-        search = "박하" #request.GET.get('searchmedicine','박하')
+        search = request.GET.get('searchmedicine','')
         print(search)
         searchMedicine_result=[]
         if search:
@@ -132,7 +123,6 @@ class find_str:
     else:
       str_stopword = '?'
     return str_stopword
-  
   def txt_extract(self):
     # Set environment variable
     os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = self.json_path
@@ -179,40 +169,101 @@ class find_str:
     result = result - trash_set
     return result
 
-def SearchOCR(request):
-    start = time.time()
-    final_list = []
-    content_list = Medicine.objects.all()
 
-    json_path = "D:/test/ocrmedicine-86e789bdf085.json"
-    image_path = "D:/test/IMG_4471.jpg"
-    df_str = pd.read_csv('D:/db/df_str.csv')
-    find = find_str(json_path, image_path, df_str)
-    results = find.searching()
-    print(results)# set형식으로 여러개의 결과값 출력.
+class searchOcrResult(APIView):
+    def get(self, request):
+        search = request.GET.get('searchocr','')
+        json_path = "D:/test/ocrmedicine-86e789bdf085.json"
+        image_path = "D:/test/IMG_4471.jpg"
+        df_str = pd.read_csv('D:/db/df_str.csv')
+        find = find_str(json_path, image_path, df_str)
+        results = find.searching()
+        results_list = list(results)
+        print(results_list)
+
+
+        finallist = ['모리코트크림', '히스탑정10mg', '에보프림연질캡슐', '셀스틴정']
+
+        all_medicine = Medicine.objects.all()
+        test_list = list()
+
+        #testsample = results_list[0]
+        #print(testsample)
+        
+        
+        searchMedicine_result=[]
+        q_object = Q()
+        for t in finallist:
+            q_object |= Q(name__startswith=t)
+
+        result = Medicine.objects.filter(q_object)
+        
+        """ if len(final_list) != 0 :
+            searchMedicine_result = all_medicine.filter(
+            Q(name__startswith = final_list[0]) |
+            Q(name__startswith = final_list[1]) |
+            Q(name__startswith = final_list[2]) |
+            Q(name__startswith = final_list[3]),
+            ) """
+            #final_list.append(searchMedicine_result)
+
+        #all_Medicines = searchMedicine_result
+        #print(querry1)
+        serializer = MedicineDetailSerializer(result, many=True)
+        return Response(serializer.data)
     
+    def SearchOCR(request):
+        
+        # final_list = []
+        # content_list = Medicine.objects.all()
 
-    for result in results:
-        if result:
-            ocr_result_list = content_list.filter(
-            Q(name__icontains = result),# | #제목
-            #Q(body__icontains = search) | #내용
-            #Q(writer__username__icontains = search) #글쓴이
+        # json_path = "D:/test/ocrmedicine-86e789bdf085.json"
+        # image_path = "D:/test/IMG_4471.jpg"
+        # df_str = pd.read_csv('D:/db/df_str.csv')
+        # find = find_str(json_path, image_path, df_str)
+        # results = find.searching()
+        
+        # # Query Set 
+        # for result in results:
+        #     if result:
+        #         ocr_result = content_list.filter(
+        #         Q(name__icontains = result),
+        #         )
+        #         if ocr_result:
+        #             final_list.extend(ocr_result.values())
+    
+        # serializer = MedicineDetailSerializer(final_list, many=True)
+        # response = Response(serializer.data)
+        # response.accepted_renderer = JSONRenderer()
+        # return response
+        final_list = []
+        content_list = Medicine.objects.all()
 
+        json_path = "D:/test/ocrmedicine-86e789bdf085.json"
+        image_path = "D:/test/IMG_4471.jpg"
+        df_str = pd.read_csv('D:/db/df_str.csv')
+        find = find_str(json_path, image_path, df_str)
+        results = find.searching()
+        results_list = list(results)
+        print((results_list[1]))# set형식으로 여러개의 결과값 출력.
+        
+        # Query Set 
+        #for result in results_list:
+        if results_list[1]:
+            ocr_result = content_list.filter(
+            Q(name__icontains = results_list[1]),
             )
-            final_list.append(ocr_result_list)
-    
-    print(final_list)
-    paginator = Paginator(final_list,5)
-    page = request.GET.get('page','')
-    posts = paginator.get_page(page)
-    boards = Medicine.objects.all()
-    end = time.time()
-    print(f"{end - start:.5f} sec")
-    return render(request, 'search_medicine.html',{'posts':posts, 'Boards':boards, 'result':result})
+            #if ocr_result:
+            #    final_list.append(ocr_result)
+        
+        print(ocr_result)
+        serializer = MedicineDetailSerializer(ocr_result, many=True)
+        return Response(serializer.data) 
+        #return render(request, 'search_medicine.html',{'posts':posts, 'Boards':boards, 'result':result})
 
 """ 증상검색 테스트 """
 def SearchSymptom(request):
+    
     start = time.time()
     content_list = Medicine.objects.all()
     search = request.GET.get('searchsymptom','')
@@ -252,17 +303,19 @@ class Medicines(APIView):
         return Response(serializer.data)
     
     def post(self, request):
-        serializer = MedicineSerializer(data=request.data)
-        if request.user.is_authenticated:
-            return NotAuthenticated
-        if not request.user.is_staff or not request.user.is_superuser:
-            return PermissionDenied
-        if serializer.is_valid():
-            new_medicine = serializer.save(permission_writer=request.user)
-            return Response(MedicineSerializer(new_medicine).data)
+        if request.user.is_staff or request.user.is_superuser:
+            serializer = MedicineSerializer(data=request.data)
+            if request.user.is_authenticated:
+                return NotAuthenticated
+            if not request.user.is_staff or not request.user.is_superuser:
+                return PermissionDenied
+            if serializer.is_valid():
+                new_medicine = serializer.save(permission_writer=request.user)
+                return Response(MedicineSerializer(new_medicine).data)
+            else:
+                return Response(serializer.errors)
         else:
-            return Response(serializer.errors)
-        
+            raise NotAuthenticated
 
 
 
@@ -275,7 +328,7 @@ class MedicineDetail(APIView):
             raise NotFound
 
     def get(self, request, pk):
-        serializer = MedicineDetailSerializer(self.get_object(pk))
+        serializer = MedicineDetailSerializer(self.get_object(pk), context={'request':request},)
         return Response(serializer.data)
     
     def put(self, request, pk):

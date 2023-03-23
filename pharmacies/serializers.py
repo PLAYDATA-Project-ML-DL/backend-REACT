@@ -23,6 +23,7 @@ class PharmacyDetailSerializer(serializers.ModelSerializer):
         model = Pharmacy
         fields = "__all__"
         # 표기할 데이터를 정한다.
+        
         # exclude = (), 제외할 항목 선택
         # fields = (), 표기할 항목 선택
 

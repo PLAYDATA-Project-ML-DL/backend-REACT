@@ -269,14 +269,14 @@ requests = ["requests (>=2.4.0,<3.0.0)"]
 
 [[package]]
 name = "elasticsearch-dsl"
-version = "7.4.1"
+version = "7.0.0"
 description = "Python client for Elasticsearch"
 category = "main"
 optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 files = [
-    {file = "elasticsearch-dsl-7.4.1.tar.gz", hash = "sha256:07ee9c87dc28cc3cae2daa19401e1e18a172174ad9e5ca67938f752e3902a1d5"},
-    {file = "elasticsearch_dsl-7.4.1-py2.py3-none-any.whl", hash = "sha256:97f79239a252be7c4cce554c29e64695d7ef6a4828372316a5e5ff815e7a7498"},
+    {file = "elasticsearch-dsl-7.0.0.tar.gz", hash = "sha256:2aedc2a4dbba9870249a57d1798ec29e44404619bded66ac920f5d6a1cbb6f22"},
+    {file = "elasticsearch_dsl-7.0.0-py2.py3-none-any.whl", hash = "sha256:763fb28add254f2c3a1d071cd114466d8a27f640e02a874afba7b8a04147c094"},
 ]
 
 [package.dependencies]
@@ -285,7 +285,7 @@ python-dateutil = "*"
 six = "*"
 
 [package.extras]
-develop = ["coverage (<5.0.0)", "mock", "pytest (>=3.0.0)", "pytest-cov", "pytest-mock (<3.0.0)", "pytz", "sphinx", "sphinx-rtd-theme"]
+develop = ["coverage (<5.0.0)", "mock", "pytest (>=3.0.0)", "pytest-cov", "pytz", "sphinx", "sphinx-rtd-theme"]
 
 [[package]]
 name = "fonttools"
@@ -1397,4 +1397,4 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "247d2065c31fb86a2e71162d9a296a4ff29b4a59616a7a8e6af19271b4b45c13"
+content-hash = "2211700d1ceb9bb93566a0afd8fef8386585724177afd5b35e5cea1c3604a8ee"
