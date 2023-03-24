@@ -6,7 +6,7 @@ urlpatterns = [
     path("<int:pk>", views.MedicineDetail.as_view()),
     path("<int:pk>/reviews", views.MedicineReview.as_view()),
     path("<int:pk>/comments", views.Comments.as_view()),
-    #path('defaultsearch/',views.searchMedicine, name="searchmedicine"),
+    path('symptomsearch/',views.SearchSymptom.as_view()),
     path('ocrsearch/',views.searchOcrResult.as_view()),
     path('search_result/',views.searchMedicineResult.as_view()),
     #path('elasticsearch/',views.ElasticSearch.as_view(), name='elasticsearch-search'),
