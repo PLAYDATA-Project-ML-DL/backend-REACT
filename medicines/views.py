@@ -59,8 +59,6 @@ class searchMedicineResult(APIView):
         page_size = 10
         start = (page-1) * page_size
         end = start + page_size
-
-        content_list = Medicine.objects.all()
         search = request.GET.get('searchmedicine','')
         
         multiSearch = search.split(",")
@@ -214,7 +212,6 @@ class SearchSymptom(APIView):
         start = (page-1) * page_size
         end = start + page_size
 
-        content_list = Medicine.objects.all()
         search = request.GET.get('searchsymptom','')
         
         multiSearch = search.split(",")
