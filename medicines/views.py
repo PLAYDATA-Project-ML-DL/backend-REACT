@@ -77,17 +77,13 @@ class searchMedicineResult(APIView):
         end = start + page_size
         start = time.time()
         search = request.GET.get('searchmedicine','')
-        print(search)
         multiSearch = search.split(",")
-        print(multiSearch)
 
         q_object = Q()
         for t in multiSearch:
-            print(t)
             q_object |= Q(name__icontains=t)
 
         pureresult = Medicine.objects.filter(q_object)
-        print(pureresult)
         result = pureresult[start:end]
         serializer = MedicineDetailSerializer(pureresult, many=True)
         print("time :", time.time() - start)
