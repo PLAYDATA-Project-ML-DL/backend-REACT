@@ -21,35 +21,22 @@ import os
 import re
 import time
 from rest_framework.renderers import JSONRenderer
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 100bd06ea6d99ddb10bffcc0099e97928fb5d863
 
 
 """ 엘라스틱 서치 테스트 """
-from elasticsearch_dsl import Search
-from elasticsearch.exceptions import NotFoundError
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from elasticsearch import Elasticsearch
-from .serializers import MedicineElasticSearchSerializer
-from elasticsearch.helpers import bulk
-class ElasticSearch(APIView):
-    # 엘라스틱 서치에 저장된 데이터 출력
-    def get(self, request):
-        # 검색어
-        query = request.GET.get('elasticsearch-search','')
-        s = Search(index='pharmacy').query('multi_match', query=query, fields=['pk','name', 'etcChoices', 'rating'])
-        # elasticsearch-dsl 패키지의 search 클래스를 사용하여
-        # Elasticsearch에서 데이터를 검색하는 예시,
-        # request에서 search 파라미터를 받아와서 Search 클래스로 엘라스틱서치 쿼리를 작성.
-        try:
-            response = s.excute()
-            # excute() : 작성된 엘라스틱 서치 쿼리로 엘라스틱서치에 요청하여 결과를 받아옴.
-            hits = response.hits
-            results = [hit.to_dict() for hit in hits]
-            serialized_results = MedicineElasticSearchSerializer(results, many=True).data
-        except NotFoundError:
-            serialized_results = []
-        return Response({'results': serialized_results})
 
+from .models import Medicine
+from .serializers import MedicineSerializer
+
+<<<<<<< HEAD
 """ 의약품 직접검색 폐기 """
 def searchMedicine(request):
     start = time.time()
@@ -69,6 +56,41 @@ def searchMedicine(request):
     return Response(serializer.data)
     #return render(request, 'search_medicine.html', json_data)
 
+=======
+
+class MedicineSearchAPIView(APIView):
+    def get(self, request, format=None):
+        # 검색어 가져오기
+        query = request.GET.get('q', '')
+        start = time.time()
+        # Elasticsearch 연결
+        es = Elasticsearch()
+
+        # 검색 쿼리 생성, 검색조건 수정가능한 부분.
+        search_query = {
+            "query": {
+                "multi_match": {
+                    "query": query,
+                    "fields": ["name^3", "basis", "effect", "caution", "cautionOtherMedicines"],
+                    "type": "best_fields",
+                    "operator": "and"
+                }
+            }
+        }
+
+        # Elasticsearch 검색 수행
+        search_results = es.search(index="medicine_index", body=search_query)
+
+        # 검색 결과에서 Medicine 객체 가져오기
+        medicine_ids = [hit['_id'] for hit in search_results['hits']['hits']]
+        medicines = Medicine.objects.filter(id__in=medicine_ids)
+
+        # Serializer로 json형태로 변환
+        serializer = MedicineDetailSerializer(medicines, many=True)
+        print("time :", time.time() - start)
+        return Response(serializer.data)
+    
+>>>>>>> 100bd06ea6d99ddb10bffcc0099e97928fb5d863
 """ 의약품 직접검색 """
 class searchMedicineResult(APIView):
     def get(self, request):
@@ -80,6 +102,7 @@ class searchMedicineResult(APIView):
         page_size = 10
         start = (page-1) * page_size
         end = start + page_size
+<<<<<<< HEAD
         content_list = Medicine.objects.all()
         search = request.GET.get('searchmedicine','')
         print(search)
@@ -91,6 +114,20 @@ class searchMedicineResult(APIView):
         all_Medicines = searchMedicine_result[start:end]
         print(all_Medicines)
         serializer = MedicineDetailSerializer(all_Medicines, many=True)
+=======
+        start = time.time()
+        search = request.GET.get('searchmedicine','')
+        multiSearch = search.split(",")
+
+        q_object = Q()
+        for t in multiSearch:
+            q_object |= Q(name__icontains=t)
+
+        pureresult = Medicine.objects.filter(q_object)
+        result = pureresult[start:end]
+        serializer = MedicineDetailSerializer(pureresult, many=True)
+        print("time :", time.time() - start)
+>>>>>>> 100bd06ea6d99ddb10bffcc0099e97928fb5d863
         return Response(serializer.data)
     
 """ 이미지 ocr 검색 """
@@ -173,13 +210,20 @@ class find_str:
 class searchOcrResult(APIView):
     def get(self, request):
         search = request.GET.get('searchocr','')
+<<<<<<< HEAD
         json_path = "C:/Users/Playdata/Desktop/dataocrmedicine-86e789bdf085.json"
         image_path = "C:/Users/Playdata/Desktop/IMG_4471.jpg"
         df_str = pd.read_csv('C:/Users/Playdata/Desktop/data/df_str.csv')
+=======
+        json_path = "D:/test/ocrmedicine-86e789bdf085.json"
+        image_path = "D:/test/IMG_4471.jpg"
+        df_str = pd.read_csv('D:/db/df_str.csv')
+>>>>>>> 100bd06ea6d99ddb10bffcc0099e97928fb5d863
         find = find_str(json_path, image_path, df_str)
         results = find.searching()
         results_list = list(results)
         print(results_list)
+<<<<<<< HEAD
 
 
         finallist = ['모리코트크림', '히스탑정10mg', '에보프림연질캡슐', '셀스틴정']
@@ -194,10 +238,16 @@ class searchOcrResult(APIView):
         searchMedicine_result=[]
         q_object = Q()
         for t in finallist:
+=======
+        
+        q_object = Q()
+        for t in results_list:
+>>>>>>> 100bd06ea6d99ddb10bffcc0099e97928fb5d863
             q_object |= Q(name__startswith=t)
 
         result = Medicine.objects.filter(q_object)
         
+<<<<<<< HEAD
         """ if len(final_list) != 0 :
             searchMedicine_result = all_medicine.filter(
             Q(name__startswith = final_list[0]) |
@@ -209,11 +259,15 @@ class searchOcrResult(APIView):
 
         #all_Medicines = searchMedicine_result
         #print(querry1)
+=======
+
+>>>>>>> 100bd06ea6d99ddb10bffcc0099e97928fb5d863
         serializer = MedicineDetailSerializer(result, many=True)
         return Response(serializer.data)
     
     def SearchOCR(request):
         
+<<<<<<< HEAD
         # final_list = []
         # content_list = Medicine.objects.all()
 
@@ -239,6 +293,11 @@ class searchOcrResult(APIView):
         final_list = []
         content_list = Medicine.objects.all()
 
+=======
+        final_list = []
+        content_list = Medicine.objects.all()
+
+>>>>>>> 100bd06ea6d99ddb10bffcc0099e97928fb5d863
         json_path = "D:/test/ocrmedicine-86e789bdf085.json"
         image_path = "D:/test/IMG_4471.jpg"
         df_str = pd.read_csv('D:/db/df_str.csv')
@@ -262,6 +321,7 @@ class searchOcrResult(APIView):
         #return render(request, 'search_medicine.html',{'posts':posts, 'Boards':boards, 'result':result})
 
 """ 증상검색 테스트 """
+<<<<<<< HEAD
 def SearchSymptom(request):
     
     start = time.time()
@@ -272,20 +332,38 @@ def SearchSymptom(request):
     if search:
         searchSymptom_result = content_list.filter(
         Q(effect__icontains = search),#효과
+=======
+class SearchSymptom(APIView):
+    def get(self, request):
+        try:
+            page = request.query_params.get('page', 1)
+            page = int(page)
+        except ValueError:
+            page = 1
+        page_size = 10
+        start = (page-1) * page_size
+        end = start + page_size
+
+        content_list = Medicine.objects.all()
+        search = request.GET.get('searchsymptom','')
+>>>>>>> 100bd06ea6d99ddb10bffcc0099e97928fb5d863
         
-        )
-    print(searchSymptom_result)  # 검색 결과를 콘솔에 출력합니다.
-    end = time.time()
-    print(f"{end - start:.5f} sec")
-    paginator = Paginator(searchSymptom_result,5)
-    page = request.GET.get('page','')
-    posts = paginator.get_page(page)
-    boards = Medicine.objects.all()
-    serializer = MedicineDetailSerializer(searchSymptom_result, many=True)
-    return render(request, 'search_medicine.html',{'posts':posts, 'Boards':boards, 'search':search})  
+        multiSearch = search.split(",")
+        print(multiSearch)
+
+        q_object = Q()
+        for t in multiSearch:
+            print(t)
+            q_object |= Q(effect__icontains=t)
+
+        pureresult = Medicine.objects.filter(q_object)
+
+        result = pureresult[start:end]
+        serializer = MedicineDetailSerializer(result, many=True)
+        return Response(serializer.data) 
 
 
-
+""" 기본 views """
 class Medicines(APIView):
 
     def get(self, request):
@@ -316,7 +394,10 @@ class Medicines(APIView):
                 return Response(serializer.errors)
         else:
             raise NotAuthenticated
+<<<<<<< HEAD
 
+=======
+>>>>>>> 100bd06ea6d99ddb10bffcc0099e97928fb5d863
 
 
 class MedicineDetail(APIView):
@@ -358,7 +439,6 @@ class MedicineDetail(APIView):
             raise PermissionDenied
         medicine.delete()
         return Response(status=HTTP_204_NO_CONTENT)
-
 
 
 class Comments(APIView):

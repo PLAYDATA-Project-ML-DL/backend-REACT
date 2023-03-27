@@ -18,10 +18,17 @@ sqlalchemy = "^2.0.5.post1"
 opencv-python = "^4.7.0.72"
 matplotlib = "^3.7.1"
 google-cloud-vision = "^3.4.0"
+<<<<<<< HEAD
 elasticsearch = "7"
 mysql = "^0.0.3"
 mysql-connector-python = "^8.0.32"
 elasticsearch-dsl = "7.0"
+=======
+mysql = "^0.0.3"
+mysql-connector-python = "^8.0.32"
+elasticsearch-dsl = "7.2.0"
+django-elasticsearch-dsl = "7.3"
+>>>>>>> 100bd06ea6d99ddb10bffcc0099e97928fb5d863
 
 
 [build-system]

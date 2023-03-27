@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Reviews</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $.ajax({
+        url: 'http://127.0.0.1:8000/api/v1/reviews/', // API 엔드포인트 URL
+        type: 'GET', // HTTP 메소드
+        dataType: 'json', // 예상되는 데이터 타입
+        success: function(data) { // 요청이 성공적으로 완료되면 호출될 함수
+          // 데이터 처리
+          console.log(data);
+          // 예시: 각 리뷰 제목을 출력
+          for (var i = 0; i < data.length; i++) {
+            $('body').append('<h2>' + data[i].title + '</h2>');
+          }
+        },
+        error: function(jqXHR, textStatus, errorThrown) { // 요청이 실패하면 호출될 함수
+          // 오류 처리
+          console.log(textStatus, errorThrown);
+        }
+      });
+    });
+  </script>
+</head>
+<body>
+  <h1>Reviews</h1>
+</body>
+</html>

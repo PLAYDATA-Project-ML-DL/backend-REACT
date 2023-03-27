@@ -10,20 +10,21 @@ from rest_framework.response import Response
 from rest_framework.status import HTTP_204_NO_CONTENT
 from rest_framework.views import APIView
 from rest_framework.exceptions import NotFound, NotAuthenticated, PermissionDenied
-
+from django.shortcuts import render
 """
 class ReviewViewSet(ModelViewSet):
     serializer_class = ReviewListSerializer
     queryset = Review.objects.all()
 """
-
-
+def test(request):
+    return render(request, 'base.html')
 
 #APIView를 활용한 데이터 관리 코드.
 
 class Reviews(APIView):
-    
-    def get(self, request, pk):
+    #template_name = 'reviews/contact.html'
+
+    def get(self, request):
         try:
             page = request.query_params.get('page', 1)
             page = int(page)
@@ -103,7 +104,8 @@ class ReviewDetail(APIView):
         review.delete()
         return Response(status=HTTP_204_NO_CONTENT)
 
-# from django.http import JsonResponse
-# 일반 스트링이 아닌 JsonResponse를 return해야 한다.
-# from django.core import serializers
-# QuerySet을 변환시켜주는 framework 
+    # from django.http import JsonResponse
+    # 일반 스트링이 아닌 JsonResponse를 return해야 한다.
+    # from django.core import serializers
+    # QuerySet을 변환시켜주는 framework 
+

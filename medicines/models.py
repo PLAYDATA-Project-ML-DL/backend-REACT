@@ -1,6 +1,6 @@
 from django.db import models
 from common.models import CommonModel
-#from elasticsearch_dsl import Document, Text, Keyword, Integer
+
 
 """ 일반 장고 모델 """
 class Medicine(models.Model):
@@ -104,39 +104,10 @@ class Comment(CommonModel):
         return self.content
     
 
-""" 엘라스틱 서치와 장고 매핑 코드 
-from elasticsearch import Elasticsearch
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-
-es = Elasticsearch("localhost:9200")
-
-@receiver(post_save, sender=Medicine)
-def save_to_elasticsearch(sender, instance, **kwargs):
-    # test2
-    es.index(index='id', body={
-        'name': instance.name,
-        'effect': instance.effect,
-    })
-    print("save data")
-
-
-class MedicineElasticSearch(Document):
-    # test1
-    name = Text(fields={'keyword': Keyword()})
-    basis = Text(fields={'keyword': Keyword()})
-    effect = Text(fields={'keyword': Keyword()})
-    caution = Text(fields={'keyword': Keyword()})
-    cautionOtherMedicines = Text()
-    etcChoices = Text()
-    
-
-    class Index:
-        name = 'medicine'
 
 
 
 
 
 
-"""
+

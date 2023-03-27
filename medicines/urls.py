@@ -6,10 +6,15 @@ urlpatterns = [
     path("<int:pk>", views.MedicineDetail.as_view()),
     path("<int:pk>/reviews", views.MedicineReview.as_view()),
     path("<int:pk>/comments", views.Comments.as_view()),
+<<<<<<< HEAD
     #path('defaultsearch/',views.searchMedicine, name="searchmedicine"),
+=======
+    path('symptomsearch/',views.SearchSymptom.as_view()),
+>>>>>>> 100bd06ea6d99ddb10bffcc0099e97928fb5d863
     path('ocrsearch/',views.searchOcrResult.as_view()),
     path('search_result/',views.searchMedicineResult.as_view()),
-    #path('elasticsearch/',views.ElasticSearch.as_view(), name='elasticsearch-search'),
+
+    path('search/', views.MedicineSearchAPIView.as_view(), name='medicine_search'),
     #path('elasticsave/',views.SaveToElasticsearchAPIView.as_view()),
 ]
 
