@@ -16,10 +16,9 @@ class ReviewViewSet(ModelViewSet):
     serializer_class = ReviewListSerializer
     queryset = Review.objects.all()
 """
-
-
-def hello_word(request):
+def test(request):
     return render(request, 'base.html')
+
 #APIView를 활용한 데이터 관리 코드.
 
 class Reviews(APIView):

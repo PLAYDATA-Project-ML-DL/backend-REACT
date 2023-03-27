@@ -48,6 +48,7 @@ THIRD_PARTY_APPS = [
     'rest_framework',
     'elasticsearch_dsl',
     'elasticsearch',
+    'django_elasticsearch_dsl',
 ]
 
 

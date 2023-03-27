@@ -24,30 +24,46 @@ from rest_framework.renderers import JSONRenderer
 
 
 """ 엘라스틱 서치 테스트 """
-from elasticsearch_dsl import Search
-from elasticsearch.exceptions import NotFoundError
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from elasticsearch import Elasticsearch
-from .serializers import MedicineElasticSearchSerializer
-from elasticsearch.helpers import bulk
-class ElasticSearch(APIView):
-    # 엘라스틱 서치에 저장된 데이터 출력
-    def get(self, request):
-        # 검색어
-        query = request.GET.get('elasticsearch-search','')
-        s = Search(index='pharmacy').query('multi_match', query=query, fields=['pk','name', 'etcChoices', 'rating'])
-        # elasticsearch-dsl 패키지의 search 클래스를 사용하여
-        # Elasticsearch에서 데이터를 검색하는 예시,
-        # request에서 search 파라미터를 받아와서 Search 클래스로 엘라스틱서치 쿼리를 작성.
-        try:
-            response = s.excute()
-            # excute() : 작성된 엘라스틱 서치 쿼리로 엘라스틱서치에 요청하여 결과를 받아옴.
-            hits = response.hits
-            results = [hit.to_dict() for hit in hits]
-            serialized_results = MedicineElasticSearchSerializer(results, many=True).data
-        except NotFoundError:
-            serialized_results = []
-        return Response({'results': serialized_results})
 
+from .models import Medicine
+from .serializers import MedicineSerializer
+
+
+class MedicineSearchAPIView(APIView):
+    def get(self, request, format=None):
+        # 검색어 가져오기
+        query = request.GET.get('q', '')
+        start = time.time()
+        # Elasticsearch 연결
+        es = Elasticsearch()
+
+        # 검색 쿼리 생성, 검색조건 수정가능한 부분.
+        search_query = {
+            "query": {
+                "multi_match": {
+                    "query": query,
+                    "fields": ["name^3", "basis", "effect", "caution", "cautionOtherMedicines"],
+                    "type": "best_fields",
+                    "operator": "and"
+                }
+            }
+        }
+
+        # Elasticsearch 검색 수행
+        search_results = es.search(index="medicine_index", body=search_query)
+
+        # 검색 결과에서 Medicine 객체 가져오기
+        medicine_ids = [hit['_id'] for hit in search_results['hits']['hits']]
+        medicines = Medicine.objects.filter(id__in=medicine_ids)
+
+        # Serializer로 json형태로 변환
+        serializer = MedicineDetailSerializer(medicines, many=True)
+        print("time :", time.time() - start)
+        return Response(serializer.data)
+    
 """ 의약품 직접검색 """
 class searchMedicineResult(APIView):
     def get(self, request):
@@ -59,10 +75,9 @@ class searchMedicineResult(APIView):
         page_size = 10
         start = (page-1) * page_size
         end = start + page_size
-
-        content_list = Medicine.objects.all()
+        start = time.time()
         search = request.GET.get('searchmedicine','')
-        
+        print(search)
         multiSearch = search.split(",")
         print(multiSearch)
 
@@ -72,9 +87,10 @@ class searchMedicineResult(APIView):
             q_object |= Q(name__icontains=t)
 
         pureresult = Medicine.objects.filter(q_object)
-
+        print(pureresult)
         result = pureresult[start:end]
-        serializer = MedicineDetailSerializer(result, many=True)
+        serializer = MedicineDetailSerializer(pureresult, many=True)
+        print("time :", time.time() - start)
         return Response(serializer.data)
     
 """ 이미지 ocr 검색 """
@@ -232,7 +248,7 @@ class SearchSymptom(APIView):
         return Response(serializer.data) 
 
 
-
+""" 기본 views """
 class Medicines(APIView):
 
     def get(self, request):
@@ -304,7 +320,6 @@ class MedicineDetail(APIView):
             raise PermissionDenied
         medicine.delete()
         return Response(status=HTTP_204_NO_CONTENT)
-
 
 
 class Comments(APIView):
