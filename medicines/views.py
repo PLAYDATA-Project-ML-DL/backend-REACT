@@ -45,7 +45,7 @@ class MedicineSearchAPIView(APIView):
             "query": {
                 "multi_match": {
                     "query": query,
-                    "fields": ["name^3", "basis", "effect", "caution", "cautionOtherMedicines"],
+                    "fields": ["name^6", "basis", "effect", "caution", "cautionOtherMedicines"],
                     "type": "best_fields",
                     "operator": "and"
                 }

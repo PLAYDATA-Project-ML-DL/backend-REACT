@@ -688,6 +688,17 @@ files = [
 ]
 
 [[package]]
+name = "logstash"
+version = "0.1dev"
+description = "Python library for Logstash"
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "logstash-0.1dev.tar.gz", hash = "sha256:99c9742100189f138d27d7602637d42fe4bfeb6e8867c079d5db88f1b9b289da"},
+]
+
+[[package]]
 name = "matplotlib"
 version = "3.7.1"
 description = "Python plotting package"
@@ -1222,6 +1233,17 @@ files = [
 six = ">=1.5"
 
 [[package]]
+name = "python-logstash"
+version = "0.4.8"
+description = "Python logging handler for Logstash."
+category = "main"
+optional = false
+python-versions = "*"
+files = [
+    {file = "python-logstash-0.4.8.tar.gz", hash = "sha256:d04e1ce11ecc107e4a4f3b807fc57d96811e964a554081b3bbb44732f74ef5f9"},
+]
+
+[[package]]
 name = "pytz"
 version = "2022.7.1"
 description = "World timezone definitions, modern and historical"
@@ -1416,4 +1438,4 @@ socks = ["PySocks (>=1.5.6,!=1.5.7,<2.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "f7f17b4cbf27b5bb5140f3deae87110dd2a83bffc2caa1e38b1fd2e2a266413d"
+content-hash = "cf7694abf1d0c69d846a98a79063d62f9378dc109e472166619227898d687e46"

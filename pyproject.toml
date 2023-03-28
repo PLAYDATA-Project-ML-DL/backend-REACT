@@ -22,6 +22,8 @@ mysql = "^0.0.3"
 mysql-connector-python = "^8.0.32"
 elasticsearch-dsl = "7.2.0"
 django-elasticsearch-dsl = "7.3"
+logstash = "^0.1.dev0"
+python-logstash = "^0.4.8"
 
 
 [build-system]
