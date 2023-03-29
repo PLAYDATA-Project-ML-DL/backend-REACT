@@ -106,6 +106,7 @@ TEMPLATES = [
         },
     },
 ]
+#LOGGING_CONFIG = 'config/logging_config.py'
 
 WSGI_APPLICATION = 'config.wsgi.application'
 

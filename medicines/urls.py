@@ -9,8 +9,11 @@ urlpatterns = [
     path('symptomsearch/',views.SearchSymptom.as_view()),
     path('ocrsearch/',views.searchOcrResult.as_view()),
     path('search_result/',views.searchMedicineResult.as_view()),
-
+    path('search_image/',views.MedicineImageSearch.as_view()),
+    #엘라스틱 서치 패스"""
     path('search/', views.MedicineSearchAPIView.as_view(), name='medicine_search'),
+
+    
     #path('elasticsave/',views.SaveToElasticsearchAPIView.as_view()),
 ]
 

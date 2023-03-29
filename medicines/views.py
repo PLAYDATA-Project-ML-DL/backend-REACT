@@ -21,9 +21,7 @@ import os
 import re
 import time
 from rest_framework.renderers import JSONRenderer
-
-
-""" 엘라스틱 서치 테스트 """
+""" 엘라스틱 서치 모듈 """
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from elasticsearch import Elasticsearch
@@ -32,6 +30,178 @@ from .models import Medicine
 from .serializers import MedicineSerializer
 
 
+""" 이미지 서치 클래스 """
+import torch.nn as nn
+import torch.multiprocessing
+import torch
+from torchvision import transforms
+from PIL import Image
+import pickle
+
+class CNN(nn.Module):
+    def __init__(self):
+        super(CNN, self).__init__()
+        self.keep_prob = 0.5
+        self.layer1 = torch.nn.Conv2d(3, 16, kernel_size=3, stride=1, padding='same')
+        self.bn1 = nn.BatchNorm2d(16)
+        self.relu1 = torch.nn.ReLU()
+        self.maxpool1 = torch.nn.MaxPool2d(kernel_size=2, stride=2)
+
+        self.layer2 = torch.nn.Conv2d(16, 32, kernel_size=3, stride=1, padding='same')
+        self.bn2 = nn.BatchNorm2d(32)
+        self.relu2 = torch.nn.ReLU()
+        self.maxpool2 = torch.nn.MaxPool2d(kernel_size=2, stride=2)
+
+        self.layer3 = torch.nn.Conv2d(32, 64, kernel_size=3, stride=1, padding='same')
+        self.bn3 = nn.BatchNorm2d(64)
+        self.relu3 = torch.nn.ReLU()
+        self.maxpool3 = torch.nn.MaxPool2d(kernel_size=2, stride=2)
+
+        self.layer4 = torch.nn.Conv2d(64, 128, kernel_size=3, stride=1, padding='same')
+        self.bn4 = nn.BatchNorm2d(128)
+        self.relu4 = torch.nn.ReLU()
+        self.maxpool4 = torch.nn.MaxPool2d(kernel_size=2, stride=2)
+
+        self.fc = nn.Linear(in_features=25088, out_features=94)
+
+    def forward(self, x):
+        out = self.layer1(x)
+        out = self.bn1(out)
+        out = self.relu1(out)
+        out = self.maxpool1(out)
+
+        out = self.layer2(out)
+        out = self.bn2(out)
+        out = self.relu2(out)
+        out = self.maxpool2(out)
+
+        out = self.layer3(out)
+        out = self.bn3(out)
+        out = self.relu3(out)
+        out = self.maxpool3(out)
+
+        out = self.layer4(out)
+        out = self.bn4(out)
+        out = self.relu4(out)
+        out = self.maxpool4(out)
+
+        out = out.view(out.size(0), -1)
+        out = self.fc(out)
+
+        return out
+
+class image_matching:
+    def __init__(self, model, img_path):
+        self.model = model
+        self.img_path = img_path
+
+    def find(self):
+        # 이미지 불러오기 및 전처리
+        img = Image.open(self.img_path).convert('RGB')
+        transform = transforms.Compose([
+            transforms.Resize((224, 224)),
+            transforms.ToTensor(),
+            transforms.Normalize(mean=[0.1948, 0.2124, 0.2306], std=[0.0730, 0.0721, 0.0380])
+        ])
+        img_tensor = transform(img)
+
+        # 모델 입력을 위해 차원 추가
+        img_tensor = img_tensor.unsqueeze(0)  # batch size 1로 변경
+
+        # 모델에 이미지 입력하여 예측 수행
+        self.model.eval()
+        with torch.no_grad():
+            output = self.model(img_tensor)
+
+        # 예측 결과 출력
+        _, predicted = torch.max(output.data, 1)
+
+        predicted_num = predicted.item()
+        return predicted_num
+
+"""
+class MedicineImageElasticSearch(APIView):
+    def get(self, request, format=None):
+            # 검색어 가져오기
+            query = request.GET.get('q', '')
+            start = time.time()
+            # Elasticsearch 연결
+            
+            with open("D:/test_image/name_num_match.pickle", 'rb') as f:
+                name_num_match = pickle.load(f)
+
+            # 모델 정의와 모델 로드
+            device = torch.device('cpu')
+            model = CNN()
+            model.load_state_dict(torch.load('D:/test_image/model.pt', map_location=device))
+            test = image_matching(model, 'D:/test_image/test_image/2.png')
+            medicine_name = name_num_match[test.find()]
+            print(medicine_name)
+            es = Elasticsearch()
+
+            # 검색 쿼리 생성, 검색조건 수정가능한 부분.
+            search_query = {
+                "query": {
+                    "multi_match": {
+                        "query": medicine_name,
+                        "fields": ["name^6", "basis", "effect", "caution", "cautionOtherMedicines"],
+                        "type": "best_fields",
+                        "operator": "and"
+                    }
+                }
+            }
+
+            # Elasticsearch 검색 수행
+            search_results = es.search(index="medicine_index", body=search_query)
+
+            # 검색 결과에서 Medicine 객체 가져오기
+            medicine_ids = [hit['_id'] for hit in search_results['hits']['hits']]
+            medicines = Medicine.objects.filter(id__in=medicine_ids)
+
+            # Serializer로 json형태로 변환
+            serializer = MedicineDetailSerializer(medicines, many=True)
+            print("time :", time.time() - start)
+            return Response(serializer.data)
+"""
+
+class MedicineImageSearch(APIView):
+    def get(self, request):
+        
+        try:
+            page = request.query_params.get('page', 1)
+            page = int(page)
+        except ValueError:
+            page = 1
+        page_size = 10
+        start = (page-1) * page_size
+        end = start + page_size
+        start = time.time()
+
+        with open("D:/test_image/name_num_match.pickle", 'rb') as f:
+                name_num_match = pickle.load(f)
+
+        device = torch.device('cpu')
+        model = CNN()
+        model.load_state_dict(torch.load('D:/test_image/model.pt', map_location=device))
+        test = image_matching(model, 'D:/test_image/test_image/2.png')
+        medicine_name = name_num_match[test.find()]
+
+        print(medicine_name)
+        multiSearch = medicine_name.split(",")
+
+        q_object = Q()
+        for t in multiSearch:
+            print(t)
+            q_object |= Q(name__icontains=t)
+
+        pureresult = Medicine.objects.filter(q_object)
+        print(pureresult)
+        #result = pureresult[start:end]
+        serializer = MedicineDetailSerializer(pureresult, many=True)
+        print("time :", time.time() - start)
+        return Response(serializer.data)
+
+""" 엘라스틱서치 """
 class MedicineSearchAPIView(APIView):
     def get(self, request, format=None):
         # 검색어 가져오기
