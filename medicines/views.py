@@ -211,16 +211,18 @@ class MedicineSearchAPIView(APIView):
         es = Elasticsearch()
 
         # 검색 쿼리 생성, 검색조건 수정가능한 부분.
+        
         search_query = {
-            "query": {
-                "multi_match": {
-                    "query": query,
-                    "fields": ["name^6", "basis", "effect", "caution", "cautionOtherMedicines"],
-                    "type": "best_fields",
-                    "operator": "and"
+                "query": {
+                    "multi_match": {
+                        "query": query,
+                        "fields": ["name^6", "basis", "effect", "caution", "cautionOtherMedicines"],
+                        "type": "best_fields",
+                        "operator": "and"
+                    }
                 }
             }
-        }
+
 
         # Elasticsearch 검색 수행
         search_results = es.search(index="medicine_index", body=search_query)
@@ -255,7 +257,8 @@ class searchMedicineResult(APIView):
 
         pureresult = Medicine.objects.filter(q_object)
         result = pureresult[start:end]
-        serializer = MedicineDetailSerializer(pureresult, many=True)
+        print(result)
+        serializer = MedicineDetailSerializer(result, many=True)
         print("time :", time.time() - start)
         return Response(serializer.data)
     
